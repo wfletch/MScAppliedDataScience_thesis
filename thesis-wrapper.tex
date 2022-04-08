@@ -1,0 +1,105 @@
+
+
+%\documentclass{scrippsthesis}
+\documentclass[a4paper,11pt,twoside]{UUthesis}
+%\usepackage[pass]{geometry}
+%%% HEADER INFORMATION %%%
+
+\title{Title}
+\author{Julia Ruiter}
+%\reader{Chris Towse}
+%\reader{Adam Landsberg}
+
+%%% Including new commands and packages.
+
+% Allows for auto formatting of theorems,
+% definitions etc.
+\usepackage{amsthm}
+\usepackage{graphics,graphicx}
+\usepackage{tikz}
+\usepackage{verbatimbox}
+\usepackage{textgreek}
+\usepackage[toc,page]{appendix}
+\usepackage{float}
+\usepackage{amsmath}
+
+
+\newtheorem{thm}{Theorem}[chapter]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition}
+\newtheorem{ex}[thm]{Example}
+
+\theoremstyle{remark}
+\newtheorem*{rmk}{Remark}
+\newtheorem*{notn}{Notation}
+\newtheorem*{pf}{Proof}
+
+% Add any new commands here.
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\NN}{\mathbb{N}}
+
+%file path for images
+
+
+%%%  END HEADER %%%
+
+\begin{document}
+%\begin{comment}
+
+\frontmatter
+
+\maketitle % Title page
+%
+%
+%%%% ABSTRACT.
+%
+\begin{abstract} 
+[write text here]]
+\end{abstract}
+
+%%% CONTENTS, FIGURES, TABLES
+\tableofcontents
+\listoffigures
+%\listoftables
+
+%%% ACKNOWLEDGEMENTS.
+
+%\begin{acknowledgments}
+%...(write here later)
+%\end{acknowledgments}
+
+%%% End of the front matter.
+
+%% MAIN MATTER - INCLUDE THE CHAPTERS.
+\mainmatter
+
+% CHAPTERS %
+
+\input{Chapters/Lorenz}
+
+
+%\end{comment}
+
+
+%%% End of the main matter.
+\backmatter
+
+%%%% BIBLIOGRAPHY (Be sure cto compile with BibTeX to make this work!)
+%
+\nocite{*} % Show everything in bib file, not just things that are explicitly cited.
+\bibliography{bibliography}
+\bibliographystyle{alpha}
+%\printbibliography
+
+
+\end{document}
+
+% double check/cross with original doc--might be undoing what is going on in 
+% have to bibtex bibliography first, then can tex rest of file
