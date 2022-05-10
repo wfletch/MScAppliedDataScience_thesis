@@ -7,7 +7,7 @@ default_network = 'network0.json'
 default_cars = 'cars0.json'
 
 
-####### TODO: generate synthetic input data  #######
+####### generate synthetic input data  #######
 class synthetic_data():
     def is_neighbour(start_node_index, list_of_nodes, threshold_value):
         ''' remove the start_node from the list_of_nodes.
