@@ -1,4 +1,5 @@
 import random
+import math
 import numpy as np
 
 
@@ -26,18 +27,43 @@ class synthetic_data():
         return neighbours_list
 
 
-    def generate_network(number_nodes, connection_probability, output_network_filename):
+    def generate_network(number_nodes, hubs_yesno = no, connection_probability, output_network_filename):
         ''' specify a number of nodes for the synthetic network and the probability (0<p<=1) that any two nodes will be connected. 
         this random graph will be output to a json file called output_filename, and contains a list of nodes and a list of neighbours per node.
+        default is no nodes are hubs.
         NOTE!  All paths will be assumed as one-way!  Therefore A==>B does not imply that B==>A exists!
         '''
+        # TODO:  add logic where start and end hubs may be the same
+        
         generated_node_list = []
         for node_ID in range(number_nodes):
             generated_node_list.append(node_ID)
 
         neighbours_dict = {start_node : is_neighbour(start_node, generated_node_list, connection_probability) for start_node in generated_node_list}
 
-        # TODO: write json
+        start_network_hubs = [] 
+        start_hub_prob_list = []
+        start_nodes_prob_list = []
+        end_network_hubs = []
+        end_hub_prob_list = []
+        end_nodes_prob_list = []
+
+        if hubs_yesno == yes:
+            max_hubs = ceil((number_nodes + 1)/2)  # no more than half the nodes can be hubs, TODO: set global threshold percent later
+            min_hubs = 1                      # TODO: set as global variable later
+            start_hub_count = random.randint(min_hubs, max_hubs)
+            end_hub_count = random.randint(min_hubs, max_hubs)
+            min_probability = 1/number_nodes
+            for i in start_hub_count:
+                start_network_hubs.append(random.choice(generated_node_list))
+                start_hub_prob_list.append(random.choice(range(min_probability, number_nodes*min_probability)))   # TODO:  check that final prob sum of hubs never exceeds 1 -- should already be true
+                end_network_hubs.append(random.choice(generated_node_list))
+                end_hub_prob_list.append(random.choice(range(min_probability, number_nodes*min_probability)))
+
+        start_nodes_prob_list = node_weights(generated_node_list, start_network_hubs, start_hub_prob_list)
+        end_nodes_prob_list = node_weights(generated_node_list, end_network_hubs, end_hub_prob_list)
+
+        # TODO: write json with: nodes, neighbours, generate IDs for edges, hubs list (start/end), prob per node (start/end)
 
 
     def node_weights(node_list, hub_list = [], hub_weight_list = []):
@@ -88,7 +114,7 @@ class network():
     edge_list = []
     car_list = []
 
-    start_network_hubs = []   # depending on commutes/time of day of simulation, start and end hubs may be different or have different probabilities
+    start_network_hubs = []   # depending on commutes/time of day of simulation, start and end hubs may be different or have different probabilities -- ONLY NEED FOR ADDING/REMOVING codes/edges/cars
     start_hub_prob_list = []
     end_network_hubs = []
     end_hub_prob_list = []
