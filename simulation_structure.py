@@ -17,8 +17,7 @@ class synthetic_data():
         for each remaining node, generate a number.
         if the number is less than threshold_value, append to neighbours_list
         '''
-        # Are you trying to copy the 'list_of_nodes' list object and then produce neighbours?
-        other_nodes = copy.deepcopy(list_of_nodes)
+        other_nodes = copy.deepcopy(list_of_nodes)     # NOTE: use deepcopy, else is only a pointer
         del other_nodes[start_node_index]
 
         neighbours_list = []
@@ -53,7 +52,7 @@ class synthetic_data():
 
         if hubs_yesno == yes:
             max_hubs = ceil((number_nodes + 1)/2)  # no more than half the nodes can be hubs, TODO: set global threshold percent later
-            min_hubs = 1                      # TODO: set as global variable later
+            min_hubs = 1                           # TODO: set as global variable later
             start_hub_count = random.randint(min_hubs, max_hubs)
             end_hub_count = random.randint(min_hubs, max_hubs)
             min_probability = 1/number_nodes
@@ -125,9 +124,11 @@ class network():
         each tick will push a new state to the server to display.
         when runtime = 0, output final state, errors, and statistics
         '''
+        # static variables
         self.name = network_name
         self.imported_network_file = network_json
         self.imported_cars_file = cars_json
+        self.simulation_duration = runtime
 
         # read network_json and append to node_list and edge_list
         # TODO separate node and edge parts of input file
