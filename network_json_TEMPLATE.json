@@ -17,7 +17,7 @@
                 }
             ],
             "hub_weight": <float>,
-            "thru_per_tick": <int>
+            "thru_per_tick": <int>,
         },
         {
             "node_ID": <int>,
