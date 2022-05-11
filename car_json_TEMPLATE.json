@@ -1,0 +1,24 @@
+{
+    "cars_in_simulation": [
+        {
+            "car_ID": <int>,
+            "status": <str: active/inactive>,
+            "start_node": <int>,
+            "end_node": <int>,
+            "decision_logic": <str: rand, shortest, other>,
+            "path_to_complete": <list: upcoming segments, may be dynamic>,
+            "path_completed": <list: append completed segments>,
+            "current_location": <int: node_ID OR edge_ID>
+        },
+        {
+            "car_ID": <int>,
+            "status": <str: active/inactive>,
+            "start_node": <int>,
+            "end_node": <int>,
+            "decision_logic": <str: rand, shortest, other>,
+            "path_to_complete": <list: upcoming segments, may be dynamic>,
+            "path_completed": <list: append completed segments>,
+            "current_location": <int: node_ID OR edge_ID>
+        }
+    ]
+}
