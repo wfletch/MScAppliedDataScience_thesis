@@ -1,6 +1,7 @@
 import random
 import math
 import numpy as np
+import copy
 
 
 ####### defaults #######
@@ -15,7 +16,8 @@ class synthetic_data():
         for each remaining node, generate a number.
         if the number is less than threshold_value, append to neighbours_list
         '''
-        other_nodes = list_of_nodes
+        # Are you trying to copy the 'list_of_nodes' list object and then produce neighbours?
+        other_nodes = copy.deepcopy(list_of_nodes)
         del other_nodes[start_node_index]
 
         neighbours_list = []
