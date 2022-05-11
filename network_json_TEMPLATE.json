@@ -1,0 +1,34 @@
+{
+    "network": [
+        {
+            "node_ID": <int>,
+            "neighbours": [
+                {
+                    "neighbour_ID": <int>,
+                    "edge_ID": <int>
+                },
+                {
+                    "neighbour_ID": <int>,
+                    "edge_ID": <int>
+                }
+            ],
+            "hub_weight": <float>,
+            "thru_per_tick": <int>
+        },
+        {
+            "node_ID": <int>,
+            "neighbours": [
+                {
+                    "neighbour_ID": <int>,
+                    "edge_ID": <int>
+                },
+                {
+                    "neighbour_ID": <int>,
+                    "edge_ID": <int>
+                }
+            ],
+            "hub_weight": <float>,
+            "thru_per_tick": <int>
+        }
+    ]
+}
