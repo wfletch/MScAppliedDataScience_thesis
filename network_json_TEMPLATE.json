@@ -6,12 +6,32 @@
                 {
                     "neighbour_ID": <int>,
                     "edge_ID": <int>,
+                    "outbound_cars": [
+                        {
+                            "car_ID": <int>,
+                            "time_on_segment": <int>
+                        },
+                        {
+                            "car_ID": <int>,
+                            "time_on_segment": <int>
+                        }
+                    ],
                     "segment_capacity": <int>,
                     "distance": <int>
                 },
                 {
                     "neighbour_ID": <int>,
                     "edge_ID": <int>,
+                    "outbound_cars": [
+                        {
+                            "car_ID": <int>,
+                            "time_on_segment": <int>
+                        },
+                        {
+                            "car_ID": <int>,
+                            "time_on_segment": <int>
+                        }
+                    ],
                     "segment_capacity": <int>,
                     "distance": <int>
                 }
@@ -25,12 +45,32 @@
                 {
                     "neighbour_ID": <int>,
                     "edge_ID": <int>,
+                    "outbound_cars": [
+                        {
+                            "car_ID": <int>,
+                            "time_on_segment": <int>
+                        },
+                        {
+                            "car_ID": <int>,
+                            "time_on_segment": <int>
+                        }
+                    ],
                     "segment_capacity": <int>,
                     "distance": <int>
                 },
                 {
                     "neighbour_ID": <int>,
                     "edge_ID": <int>,
+                    "outbound_cars": [
+                        {
+                            "car_ID": <int>,
+                            "time_on_segment": <int>
+                        },
+                        {
+                            "car_ID": <int>,
+                            "time_on_segment": <int>
+                        }
+                    ],
                     "segment_capacity": <int>,
                     "distance": <int>
                 }
