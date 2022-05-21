@@ -1,0 +1,33 @@
+{
+    "node_list": [
+        {
+            "node_ID": 1
+        },
+        {
+            "node_ID": 2
+        },
+        {
+            "node_ID": 3
+        },
+        {
+            "node_ID": 4
+        }
+    ],
+    "edge_list": [
+        {
+            "start_node": 1,
+            "end_node": 2,
+            "edge_ID": 5000
+        },
+        {
+            "start_node": 2,
+            "end_node": 3,
+            "edge_ID": 5001
+        },
+        {
+            "start_node": 2,
+            "end_node": 4,
+            "edge_ID": 5002
+        }
+    ]
+}
