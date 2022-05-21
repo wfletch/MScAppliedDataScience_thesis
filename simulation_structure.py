@@ -1,15 +1,20 @@
 import json
 
 class TrafficManager():
-    def __init__(self, network_manager):
+    def __init__(self, network_manager, car_config):
         self.nm = network_manager
+        # self.car_id_to_car_mapping = {}
 
+        for car_entry in car_config["car_list"]:
+            new_car = Car(car_entry)
+            # self.car_id_to_car_mapping[new_car.id] = new_car
+        
     def tick():
         pass
 
 
 class NetworkManager():
-    def __init__(self, network_config, car_config):
+    def __init__(self, network_config):
         self.node_id_to_node_mapping = {}
         self.edge_id_to_edge_mapping = {}
 
