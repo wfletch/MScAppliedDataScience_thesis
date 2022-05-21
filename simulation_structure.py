@@ -45,6 +45,14 @@ class Edge():
         self.start_node = config["start_node"]
         self.end_node = config["end_node"]
 
+class Car():
+    def __init__(self, config) -> None:
+        self.id = config["car_ID"]
+        self.start_node = config["start_node"]
+        self.end_node = config["end_node"]
+        self.path = config["path"]
+
+
 if __name__ == "__main__":
     fh_network = open('network_config.json')
     imported_network = json.load(fh_network)
