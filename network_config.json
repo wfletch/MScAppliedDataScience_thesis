@@ -17,17 +17,20 @@
         {
             "start_node": 1,
             "end_node": 2,
-            "edge_ID": 5000
+            "edge_ID": 5000,
+            "edge_length": 2
         },
         {
             "start_node": 2,
             "end_node": 3,
-            "edge_ID": 5001
+            "edge_ID": 5001,
+            "edge_length": 2
         },
         {
             "start_node": 2,
             "end_node": 4,
-            "edge_ID": 5002
+            "edge_ID": 5002,
+            "edge_length": 2
         }
     ]
 }
