@@ -28,10 +28,10 @@ class TrafficManager():
 
         
     def tick(self):       # CHECK IF CORRECT SYNTAX
-        node_list = list(self.nm.node_id_to_node_mapping.keys)   
+        node_list = list(self.nm.node_id_to_node_mapping.keys())   
         random.shuffle(node_list)   # ensure no node nor edge's inbound traffic favoured
-        for node in node_list:   
-            node.node_tick()
+        for node in node_list:
+            self.nm.node_tick(node)
         self.output_network_state()
 
 
@@ -96,7 +96,7 @@ class Node():
         return inbound_edge.get_car_waiting_to_leave()   # bounded deque automaticallly discards extra later
 
     def node_tick(self):
-        for key in list(self.inbound_edge_id_to_edge_mapping.keys):
+        for key in list(self.inbound_edge_id_to_edge_mapping.keys()):
             inbound_edge = self.inbound_edge_id_to_edge_mapping[key]
             # TODO: need random shuffle on inbound edge order
             if inbound_edge.has_car_waiting_to_leave():
