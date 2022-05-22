@@ -83,7 +83,19 @@ class Node():
 
 
     def node_tick(self):
-        pass
+        for key in list(self.inbound_edge_id_to_edge_mapping.keys):
+            inbound_edge = self.inbound_edge_id_to_edge_mapping[key]
+            if inbound_edge.has_car_waiting_to_leave() == True:
+                car_to_move = inbound_edge.get_car_waiting_to_leave()
+                if car_to_move.get_terminal_point() == self.id: # path complete
+                    pass  # delete car later / store complete trips later
+                next_edge = car_to_move.get_next_edge_id()
+                self.check_outbound_opening()
+
+
+
+
+
 
     
 
@@ -109,7 +121,19 @@ class Car():
         self.id = config["car_ID"]
         self.start_node = config["start_node"]
         self.end_node = config["end_node"]
-        self.path = config["path"]   # replace with path calculation later
+        self.upcoming_path = config["path"]   # replace with path calculation later
+        self.edge_stack = copy.deepcopy(self.upcoming_path)
+        self.edge_stack.reverse()   # reverse order for pop / next_edge function
+        self.path_driven = []
+    
+    def get_next_edge_id(self):  # derive from path computation later
+        next_edge = self.edge_stack.pop()
+        self.path_driven.append(next_edge)    # don't actually do this til confirmed
+        return next_edge
+
+    def get_terminal_point(self):
+        return self.end_node
+
 
 
 
