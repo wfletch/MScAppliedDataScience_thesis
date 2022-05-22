@@ -72,21 +72,18 @@ class Node():
         if not outbound_edge:
             return False 
             # exception needed:  car cannot move as intended, see if recalculation possible
-        elif outbound_edge.queue[0]:
-            return False
-        return True
+        return outbound_edge.has_space_for_new_car()
 
     def check_inbound_car_waiting(self, inbound_edge):
         '''see if car in last position, if so return True'''
-        if inbound_edge.queue[-1]:
-            return True
+        return inbound_edge.has_car_waiting_to_leave()
 
-    def get_car_ID(self, inbound_edge):
-        return inbound_edge.queue.pop()
+    def get_car_to_move(self, inbound_edge):
+        return inbound_edge.get_car_waiting_to_leave()   # bounded deque automaticallly discards extra later
 
-    
 
-    def move_car(self):
+    def node_tick(self):
+        pass
 
     
 
@@ -97,6 +94,15 @@ class Edge():
         self.end_node = config["end_node"]
         self.length = config["edge_length"]
         self.queue = collections.deque([None] * self.length, maxlen=self.length)
+        self.pre_loaded_cars = []
+    def has_space_for_new_car(self):
+        return False if self.queue[0] else True
+    def has_car_waiting_to_leave(self):
+        return True if self.queue[-1] else False
+    def get_car_waiting_to_leave(self):
+        return self.queue[-1]
+    def shift_cars_up(self):
+        self.queue.appendleft(None)  # bounded deque automaticallly discards last element
 
 class Car():
     def __init__(self, config) -> None:
