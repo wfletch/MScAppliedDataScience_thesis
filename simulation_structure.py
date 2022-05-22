@@ -1,6 +1,6 @@
 import collections
+import copy
 import json
-from tracemalloc import start
 
 class TrafficManager():
     def __init__(self, network_manager, car_config):
@@ -118,7 +118,7 @@ class Edge():
 
 class Car():
     def __init__(self, config) -> None:
-        self.id = config["car_ID"]
+        self.id = config["car_id"]
         self.start_node = config["start_node"]
         self.end_node = config["end_node"]
         self.upcoming_path = config["path"]   # replace with path calculation later
@@ -150,36 +150,10 @@ if __name__ == "__main__":
 
     fh_car.close()
     # print(imported_cars)
-    nm = NetworkManager(imported_network, imported_cars)
-    tm = TrafficManager(nm)
+    nm = NetworkManager(imported_network)
+    tm = TrafficManager(nm, imported_cars)
 
 
-
-
-
-# class edge():
-
-
-
-
-
-
-
-# class car():
-
-
-
-
-
-
-
-
-class traffic_manager():
-    def __init__(self):
-        pass
-
-    def move():
-        pass
 
 
     
