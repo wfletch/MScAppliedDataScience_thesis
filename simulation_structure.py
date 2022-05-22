@@ -14,12 +14,25 @@ class TrafficManager():
             # self.car_id_to_car_mapping[new_car.id] = new_car
             if not self.nm.place_new_car(new_car):
                 self.fail_to_add.append(new_car)
+
+
+    def output_network_state(self):
+        network_dump = {}
+        network_dump["node_list"] = self.nm.node_id_to_node_mapping
+        network_dump["edge_list"] = self.nm.edge_id_to_edge_mapping
+        network_dump["cars_misc"] = {
+            "failed_to_add": self.fail_to_add,
+            "car_routes_completed": self.inactive_cars
+        }
+        print(network_dump)
+
         
-    def tick():       # CHECK IF CORRECT SYNTAX
+    def tick(self):       # CHECK IF CORRECT SYNTAX
         node_list = list(self.nm.node_id_to_node_mapping.keys)   
         random.shuffle(node_list)   # ensure no node nor edge's inbound traffic favoured
         for node in node_list:   
             node.node_tick()
+        self.output_network_state()
 
 
 class NetworkManager():
@@ -161,6 +174,10 @@ if __name__ == "__main__":
     # print(imported_cars)
     nm = NetworkManager(imported_network)
     tm = TrafficManager(nm, imported_cars)
+
+    tm.tick()
+    tm.tick()
+
 
 
 
