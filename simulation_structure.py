@@ -1,6 +1,7 @@
 import collections
 import copy
 import json
+import random
 
 class TrafficManager():
     def __init__(self, network_manager, car_config):
@@ -13,10 +14,12 @@ class TrafficManager():
             # self.car_id_to_car_mapping[new_car.id] = new_car
             if not self.nm.place_new_car(new_car):
                 self.fail_to_add.append(new_car)
-
         
-    def tick():
-        pass
+    def tick():       # CHECK IF CORRECT SYNTAX
+        node_list = list(self.nm.node_id_to_node_mapping.keys)   
+        random.shuffle(node_list)   # ensure no node nor edge's inbound traffic favoured
+        for node in node_list:   
+            node.node_tick()
 
 
 class NetworkManager():
@@ -44,15 +47,11 @@ class NetworkManager():
 
     def place_new_car(self, car_entry):
         # what if we don't have space?
-        # what if the start node DNE?
         start_node = self.node_id_to_node_mapping[car_entry.start_node]
         if not start_node:
             return False
             # raise Exception("that node does not exist")
         start_node.add_pre_load_car(car_entry)
-
-
-
 
 
 
@@ -86,6 +85,7 @@ class Node():
     def node_tick(self):
         for key in list(self.inbound_edge_id_to_edge_mapping.keys):
             inbound_edge = self.inbound_edge_id_to_edge_mapping[key]
+            # TODO: need random shuffle on inbound edge order
             if inbound_edge.has_car_waiting_to_leave():
                 car_to_move = inbound_edge.get_car_waiting_to_leave()
                 if car_to_move.get_terminal_point() == self.id:     # path complete
