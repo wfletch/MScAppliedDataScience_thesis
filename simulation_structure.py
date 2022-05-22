@@ -23,6 +23,7 @@ class NetworkManager():
     def __init__(self, network_config):
         self.node_id_to_node_mapping = collections.defaultdict(lambda: None)
         self.edge_id_to_edge_mapping = {}
+        self.inactive_cars = []     # cars who have completed their trips
 
         for node_entry in network_config["node_list"]:
             new_node = Node(node_entry)
@@ -47,7 +48,7 @@ class NetworkManager():
         start_node = self.node_id_to_node_mapping[car_entry.start_node]
         if not start_node:
             return False
-            # raise Exception("dude, that fucking node does not fucking exist")
+            # raise Exception("that node does not exist")
         start_node.add_pre_load_car(car_entry)
 
 
@@ -61,6 +62,7 @@ class Node():
         self.inbound_edge_id_to_edge_mapping = {}
         self.outbound_edge_id_to_edge_mapping = {}
         self.pre_loaded_cars = []
+        self.cars_exiting_network = []  # cars that completed routes at this node
 
     def add_pre_load_car(self, car):   # rename accurately later
         # some logic to check if it's even possible?
@@ -81,23 +83,27 @@ class Node():
     def get_car_to_move(self, inbound_edge):
         return inbound_edge.get_car_waiting_to_leave()   # bounded deque automaticallly discards extra later
 
-
     def node_tick(self):
         for key in list(self.inbound_edge_id_to_edge_mapping.keys):
             inbound_edge = self.inbound_edge_id_to_edge_mapping[key]
-            if inbound_edge.has_car_waiting_to_leave() == True:
+            if inbound_edge.has_car_waiting_to_leave():
                 car_to_move = inbound_edge.get_car_waiting_to_leave()
-                if car_to_move.get_terminal_point() == self.id: # path complete
-                    pass  # delete car later / store complete trips later
+                if car_to_move.get_terminal_point() == self.id:     # path complete
+                    self.cars_exiting_network.append(car_to_move)  # delete car from network / store trip complete
+                # check if outbound possible:
                 next_edge = car_to_move.get_next_edge_id()
-                self.check_outbound_opening()
+                if not next_edge:
+                    # exception needed:  car cannot move as intended, see if recalculation possible
+                    raise Exception("that edge does not exist")
+                elif next_edge.has_space_for_new_car():
+                    if not next_edge.pre_loaded_cars[0]:  # if no cars in wait -- TODO:  set up function in car,
+                        next_edge.pre_loaded_cars.append(car_to_move)
+                        inbound_edge.shift_cars_up()
+                        next_edge.pre_loaded_cars.append(None)   # clear waiting queue
+
+                # TODO: add +1 to car_on_network_time ==> use to calculate delays ==> VERSION 2
 
 
-
-
-
-
-    
 
 class Edge():
     def __init__(self, config) -> None:
@@ -106,7 +112,8 @@ class Edge():
         self.end_node = config["end_node"]
         self.length = config["edge_length"]
         self.queue = collections.deque([None] * self.length, maxlen=self.length)
-        self.pre_loaded_cars = []
+        self.pre_loaded_cars = collections.deque([None], maxlen=1)  # FOR NOW:  assume only one car can enter at a time
+
     def has_space_for_new_car(self):
         return False if self.queue[0] else True
     def has_car_waiting_to_leave(self):
@@ -114,7 +121,9 @@ class Edge():
     def get_car_waiting_to_leave(self):
         return self.queue[-1]
     def shift_cars_up(self):
-        self.queue.appendleft(None)  # bounded deque automaticallly discards last element
+        self.queue.appendleft(self.pre_loaded_cars)  # None OR car_id
+        # self.queue.appendleft(None)  # bounded deque automaticallly discards last element
+
 
 class Car():
     def __init__(self, config) -> None:
