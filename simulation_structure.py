@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import collections
 import copy
 import json
@@ -18,20 +19,17 @@ class TrafficManager():
 
     def output_network_state(self):
         network_dump = {}
-        network_dump["node_list"] = self.nm.node_id_to_node_mapping
-        network_dump["edge_list"] = self.nm.edge_id_to_edge_mapping
-        network_dump["cars_misc"] = {
-            "failed_to_add": self.fail_to_add,
-            "car_routes_completed": self.inactive_cars
+        #network_dump["node_list"] = json.dumps(self.nm.node_id_to_node_mapping)
+        #network_dump["edge_list"] = json.dumps(self.nm.edge_id_to_edge_mapping)
+        network_dump["cars_misc"] = {                           # ==> either overwrite string function or do something else
+            "number_failed_to_add": len(self.fail_to_add),
+            "number_car_routes_completed": len(self.nm.inactive_cars)
         }
         print(network_dump)
 
         
-    def tick(self):       # CHECK IF CORRECT SYNTAX
-        node_list = list(self.nm.node_id_to_node_mapping.keys())   
-        random.shuffle(node_list)   # ensure no node nor edge's inbound traffic favoured
-        for node in node_list:
-            self.nm.node_tick(node)
+    def tick(self):     
+        self.nm.tick()
         self.output_network_state()
 
 
@@ -58,14 +56,21 @@ class NetworkManager():
             to_node.inbound_edge_id_to_edge_mapping[new_edge.id] = new_edge
         print(self.edge_id_to_edge_mapping)
 
-    def place_new_car(self, car_entry):
+    def place_new_car(self, car_entry): #None
         # what if we don't have space?
         start_node = self.node_id_to_node_mapping[car_entry.start_node]
         if not start_node:
             return False
             # raise Exception("that node does not exist")
         start_node.add_pre_load_car(car_entry)
+        return True
 
+    def tick(self):     
+        node_list = list(self.node_id_to_node_mapping.keys())   
+        random.shuffle(node_list)   # ensure no node nor edge's inbound traffic favoured
+        for node_id in node_list:
+            node = self.node_id_to_node_mapping[node_id]
+            node.node_tick()
 
 
 class Node():
@@ -96,6 +101,19 @@ class Node():
         return inbound_edge.get_car_waiting_to_leave()   # bounded deque automaticallly discards extra later
 
     def node_tick(self):
+        if self.pre_loaded_cars != []:
+            car_to_add = self.pre_loaded_cars.pop()  # TODO: handle all new cars (for loop)
+            next_edge_id = car_to_add.get_next_edge_id()
+            next_edge = self.outbound_edge_id_to_edge_mapping[next_edge_id]
+            print(next_edge_id)
+            if not next_edge:
+                # exception needed:  car cannot move as intended, see if recalculation possible
+                raise Exception("that edge does not exist")
+            elif next_edge.has_space_for_new_car():
+                if not next_edge.pre_loaded_cars[0]:  # if no cars in wait -- TODO:  set up function in car,
+                    next_edge.pre_loaded_cars.append(car_to_add)
+                    next_edge.pre_loaded_cars.append(None)   # clear waiting queue
+
         for key in list(self.inbound_edge_id_to_edge_mapping.keys()):
             inbound_edge = self.inbound_edge_id_to_edge_mapping[key]
             # TODO: need random shuffle on inbound edge order
@@ -104,7 +122,8 @@ class Node():
                 if car_to_move.get_terminal_point() == self.id:     # path complete
                     self.cars_exiting_network.append(car_to_move)  # delete car from network / store trip complete
                 # check if outbound possible:
-                next_edge = car_to_move.get_next_edge_id()
+                next_edge_id = car_to_move.get_next_edge_id()
+                next_edge = self.outbound_edge_id_to_edge_mapping[next_edge_id]
                 if not next_edge:
                     # exception needed:  car cannot move as intended, see if recalculation possible
                     raise Exception("that edge does not exist")
@@ -175,8 +194,8 @@ if __name__ == "__main__":
     nm = NetworkManager(imported_network)
     tm = TrafficManager(nm, imported_cars)
 
-    tm.tick()
-    tm.tick()
+    for i in range(10):
+        tm.tick()
 
 
 
