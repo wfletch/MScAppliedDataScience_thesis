@@ -6,6 +6,7 @@ import random
 class TrafficManager():
     def __init__(self, network_manager, car_config):
         self.nm = network_manager
+        self.tick_count = 0
         self.fail_to_add = []
         # self.car_id_to_car_mapping = {}
 
@@ -27,9 +28,10 @@ class TrafficManager():
         print(network_dump)
 
         
-    def tick(self):     
+    def tick(self):
+        print("TICK:", self.tick_count)    
         self.nm.tick()
-        self.output_network_state()
+        self.tick_count+=1
 
 
 class NetworkManager():
@@ -66,11 +68,15 @@ class NetworkManager():
 
     def tick(self):     
         node_list = list(self.node_id_to_node_mapping.keys())   
+        edge_list = list(self.edge_id_to_edge_mapping.keys())   
         random.shuffle(node_list)   # ensure no node nor edge's inbound traffic favoured
         for node_id in node_list:
-            print(node_id)
             node = self.node_id_to_node_mapping[node_id]
             node.node_tick()
+        for edge_id in edge_list:
+            edge = self.edge_id_to_edge_mapping[edge_id]
+            edge.shift_cars_up()
+            print(edge.id, edge.queue)
 
 
 class Node():
@@ -103,39 +109,47 @@ class Node():
     def node_tick(self):
         if self.pre_loaded_cars != []:
             car_to_add = self.pre_loaded_cars.pop()  # TODO: handle all new cars (for loop)
-            print(car_to_add)
             next_edge_id = car_to_add.get_next_edge_id()
-            next_edge = self.outbound_edge_id_to_edge_mapping[next_edge_id]
-            print(next_edge_id)
-            if not next_edge:
-                # exception needed:  car cannot move as intended, see if recalculation possible
-                raise Exception("that edge does not exist")
-            elif next_edge.has_space_for_new_car():
-                if not next_edge.pre_loaded_cars[0]:  # if no cars in wait -- TODO:  set up function in car,
-                    next_edge.pre_loaded_cars.append(car_to_add)
-                    next_edge.pre_loaded_cars.append(None)   # clear waiting queue
-
-        for key in list(self.inbound_edge_id_to_edge_mapping.keys()):
-            inbound_edge = self.inbound_edge_id_to_edge_mapping[key]
-            print(key)
-            # TODO: need random shuffle on inbound edge order
-            if inbound_edge.has_car_waiting_to_leave():
-                car_to_move = inbound_edge.get_car_waiting_to_leave()
-                if car_to_move.get_terminal_point() == self.id:     # path complete
-                    self.cars_exiting_network.append(car_to_move)  # delete car from network / store trip complete
-                # check if outbound possible:
-                next_edge_id = car_to_move.get_next_edge_id()
+            if next_edge_id != None:
                 next_edge = self.outbound_edge_id_to_edge_mapping[next_edge_id]
                 if not next_edge:
                     # exception needed:  car cannot move as intended, see if recalculation possible
                     raise Exception("that edge does not exist")
                 elif next_edge.has_space_for_new_car():
+                    print("We have space for a new car")
                     if not next_edge.pre_loaded_cars[0]:  # if no cars in wait -- TODO:  set up function in car,
-                        next_edge.pre_loaded_cars.append(car_to_move)
-                        inbound_edge.shift_cars_up()
-                        next_edge.pre_loaded_cars.append(None)   # clear waiting queue
-
-                # TODO: add +1 to car_on_network_time ==> use to calculate delays ==> VERSION 2
+                        print("We are adding a car!")
+                        next_edge.pre_loaded_cars.append(car_to_add)
+                        print ("NEXT EDGE QUEUE:", next_edge.pre_loaded_cars)
+                        # next_edge.pre_loaded_cars.append(None)   # clear waiting queue
+                return
+        for key in list(self.inbound_edge_id_to_edge_mapping.keys()):
+            inbound_edge = self.inbound_edge_id_to_edge_mapping[key]
+            # TODO: need random shuffle on inbound edge order
+            if inbound_edge.has_car_waiting_to_leave():
+                print("We have a car waitng to leave")
+                car_to_move = inbound_edge.get_car_waiting_to_leave()
+                if car_to_move.get_terminal_point() == self.id:     # path complete
+                    self.cars_exiting_network.append(car_to_move)  # delete car from network / store trip complete
+                    print("A car has reached it's destination")
+                    continue
+                # check if outbound possible:
+                next_edge_id = car_to_move.get_next_edge_id()
+                if next_edge_id != None:
+                    next_edge = self.outbound_edge_id_to_edge_mapping[next_edge_id]
+                    if not next_edge:
+                        # exception needed:  car cannot move as intended, see if recalculation possible
+                        raise Exception("that edge does not exist")
+                    if next_edge.has_space_for_new_car():
+                        if not next_edge.pre_loaded_cars[0]:  # if no cars in wait -- TODO:  set up function in car,
+                            next_edge.pre_loaded_cars.append(car_to_move)
+                        else:
+                            print("This edge has cars waiting to load")   # clear waiting queue
+                    else:
+                        print("There is no space for this car. Do nothing")
+                    # TODO: add +1 to car_on_network_time ==> use to calculate delays ==> VERSION 2
+                else:
+                    print("This car has no path left")
 
 
 
@@ -153,9 +167,17 @@ class Edge():
     def has_car_waiting_to_leave(self):
         return True if self.queue[-1] else False
     def get_car_waiting_to_leave(self):
-        return self.queue[-1]
+        car = self.queue[-1]
+        self.queue[-1] = None
+        return car
     def shift_cars_up(self):
-        self.queue.appendleft(self.pre_loaded_cars)  # None OR car_id
+        """Shift all cars up by one position
+        First check if we have any newcomers"""
+        car = self.pre_loaded_cars[0]
+        if car:
+            self.pre_loaded_cars[0] = None
+            self.queue.appendleft(car)  # This is expensive!
+        self.queue.rotate()
         # self.queue.appendleft(None)  # bounded deque automaticallly discards last element
 
 
@@ -170,6 +192,9 @@ class Car():
         self.path_driven = []
     
     def get_next_edge_id(self):  # derive from path computation later
+        if self.edge_stack == []:
+            # We are at the end of our journey!
+            return None
         next_edge = self.edge_stack.pop()
         self.path_driven.append(next_edge)    # don't actually do this til confirmed
         return next_edge
@@ -196,7 +221,7 @@ if __name__ == "__main__":
     nm = NetworkManager(imported_network)
     tm = TrafficManager(nm, imported_cars)
 
-    for i in range(10):
+    for i in range(8):
         tm.tick()
 
 
