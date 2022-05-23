@@ -17,6 +17,7 @@ class TrafficManager():
 
 
     def output_network_state(self):
+        '''set up later: export json of state to use for visualizer'''
         network_dump = {}
         #network_dump["node_list"] = json.dumps(self.nm.node_id_to_node_mapping)
         #network_dump["edge_list"] = json.dumps(self.nm.edge_id_to_edge_mapping)
