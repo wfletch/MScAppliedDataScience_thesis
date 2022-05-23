@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 import collections
 import copy
 import json
@@ -42,7 +41,7 @@ class NetworkManager():
         for node_entry in network_config["node_list"]:
             new_node = Node(node_entry)
             self.node_id_to_node_mapping[new_node.id] = new_node
-        print(self.node_id_to_node_mapping)
+        # print(self.node_id_to_node_mapping)
 
         for edge_entry in network_config["edge_list"]:
             new_edge = Edge(edge_entry)
@@ -54,7 +53,7 @@ class NetworkManager():
 
             to_node = self.node_id_to_node_mapping[new_edge.end_node]
             to_node.inbound_edge_id_to_edge_mapping[new_edge.id] = new_edge
-        print(self.edge_id_to_edge_mapping)
+        # print(self.edge_id_to_edge_mapping)
 
     def place_new_car(self, car_entry): #None
         # what if we don't have space?
@@ -69,6 +68,7 @@ class NetworkManager():
         node_list = list(self.node_id_to_node_mapping.keys())   
         random.shuffle(node_list)   # ensure no node nor edge's inbound traffic favoured
         for node_id in node_list:
+            print(node_id)
             node = self.node_id_to_node_mapping[node_id]
             node.node_tick()
 
@@ -103,6 +103,7 @@ class Node():
     def node_tick(self):
         if self.pre_loaded_cars != []:
             car_to_add = self.pre_loaded_cars.pop()  # TODO: handle all new cars (for loop)
+            print(car_to_add)
             next_edge_id = car_to_add.get_next_edge_id()
             next_edge = self.outbound_edge_id_to_edge_mapping[next_edge_id]
             print(next_edge_id)
@@ -116,6 +117,7 @@ class Node():
 
         for key in list(self.inbound_edge_id_to_edge_mapping.keys()):
             inbound_edge = self.inbound_edge_id_to_edge_mapping[key]
+            print(key)
             # TODO: need random shuffle on inbound edge order
             if inbound_edge.has_car_waiting_to_leave():
                 car_to_move = inbound_edge.get_car_waiting_to_leave()
