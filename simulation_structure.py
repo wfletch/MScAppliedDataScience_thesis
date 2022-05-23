@@ -35,7 +35,7 @@ class TrafficManager():
 class NetworkManager():
     def __init__(self, network_config):
         self.node_id_to_node_mapping = collections.defaultdict(lambda: None)
-        self.edge_id_to_edge_mapping = {}
+        self.edge_id_to_edge_mapping = collections.defaultdict(lambda: None)
         self.inactive_cars = []     # cars who have completed their trips
 
         for node_entry in network_config["node_list"]:
@@ -76,8 +76,8 @@ class NetworkManager():
 class Node():
     def __init__(self, config) -> None:
         self.id = config["node_ID"]
-        self.inbound_edge_id_to_edge_mapping = {}
-        self.outbound_edge_id_to_edge_mapping = {}
+        self.inbound_edge_id_to_edge_mapping = collections.defaultdict(lambda: None)
+        self.outbound_edge_id_to_edge_mapping = collections.defaultdict(lambda: None)
         self.pre_loaded_cars = []
         self.cars_exiting_network = []  # cars that completed routes at this node
 
