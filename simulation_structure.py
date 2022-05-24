@@ -175,7 +175,6 @@ class Edge():
         self.queue = collections.deque([None] * self.length, maxlen=self.length)
         self.pre_loaded_cars = collections.deque([None], maxlen=1)  # FOR NOW:  assume only one car can enter at a time
         self.open_space_at_end = False  # Toggle in node_tick if car leaves edge
-        self.advance_queue = False      # Toggle in node_tick
 
     def has_space_for_new_car(self, spot_index):
         return False if self.queue[spot_index] else True
@@ -212,7 +211,7 @@ class Edge():
                     adjacent_null_counter = 0
                 else:
                     adjacent_null_counter = 1
-            new_edge_queue.append(null_counter * [None])
+            new_edge_queue.append(null_counter * [None])   # this is appending a list of everything.... fix later
             self.queue = new_edge_queue
             self.open_space_at_end = False  # ensure flag is back to false
             
