@@ -98,7 +98,7 @@ class Node():
         if not outbound_edge:
             return False 
             # exception needed:  car cannot move as intended, see if recalculation possible
-        return outbound_edge.has_space_for_new_car()
+        return outbound_edge.has_space_for_new_car(0)
 
     def check_inbound_car_waiting(self, inbound_edge):
         '''see if car in last position, if so return True'''
@@ -116,14 +116,16 @@ class Node():
                 if not next_edge:
                     # exception needed:  car cannot move as intended, see if recalculation possible
                     raise Exception("that edge does not exist")
-                elif next_edge.has_space_for_new_car():
+                elif next_edge.has_space_for_new_car(0):
                     print("We have space for a new car")
                     if not next_edge.pre_loaded_cars[0]:  # if no cars in wait -- TODO:  set up function in car,
                         print("We are adding a car!")
                         next_edge.pre_loaded_cars.append(car_to_add)
                         print ("NEXT EDGE QUEUE:", next_edge.pre_loaded_cars)
                         # next_edge.pre_loaded_cars.append(None)   # clear waiting queue
+
                 return
+                
         for key in list(self.inbound_edge_id_to_edge_mapping.keys()):
             inbound_edge = self.inbound_edge_id_to_edge_mapping[key]
             # TODO: need random shuffle on inbound edge order
@@ -141,7 +143,7 @@ class Node():
                     if not next_edge:
                         # exception needed:  car cannot move as intended, see if recalculation possible
                         raise Exception("that edge does not exist")
-                    if next_edge.has_space_for_new_car():
+                    if next_edge.has_space_for_new_car(0):
                         if not next_edge.pre_loaded_cars[0]:  # if no cars in wait -- TODO:  set up function in car,
                             next_edge.pre_loaded_cars.append(car_to_move)
                         else:
@@ -163,8 +165,8 @@ class Edge():
         self.queue = collections.deque([None] * self.length, maxlen=self.length)
         self.pre_loaded_cars = collections.deque([None], maxlen=1)  # FOR NOW:  assume only one car can enter at a time
 
-    def has_space_for_new_car(self):
-        return False if self.queue[0] else True
+    def has_space_for_new_car(self, spot_index):
+        return False if self.queue[spot_index] else True
     def has_car_waiting_to_leave(self):
         return True if self.queue[-1] else False
     def get_car_waiting_to_leave(self):
