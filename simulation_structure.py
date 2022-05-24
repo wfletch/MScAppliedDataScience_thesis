@@ -108,6 +108,7 @@ class Node():
         return inbound_edge.get_car_waiting_to_leave()   # bounded deque automaticallly discards extra later
 
     def node_tick(self):
+        # this block handles loading new cars:
         if self.pre_loaded_cars != []:
             car_to_add = self.pre_loaded_cars.pop()  # TODO: handle all new cars (for loop)
             next_edge_id = car_to_add.get_next_edge_id()
@@ -117,39 +118,48 @@ class Node():
                     # exception needed:  car cannot move as intended, see if recalculation possible
                     raise Exception("that edge does not exist")
                 elif next_edge.has_space_for_new_car(0):
-                    print("We have space for a new car")
+                    print(next_edge.id, "has potential space for a new car")
                     if not next_edge.pre_loaded_cars[0]:  # if no cars in wait -- TODO:  set up function in car,
-                        print("We are adding a car!")
-                        next_edge.pre_loaded_cars.append(car_to_add)
-                        print ("NEXT EDGE QUEUE:", next_edge.pre_loaded_cars)
+                        # print("We are adding a car!")
+                        next_edge.pre_loaded_cars.append(car_to_add.id)
+                        print (next_edge.id, "incoming queue:", next_edge.pre_loaded_cars)
                         # next_edge.pre_loaded_cars.append(None)   # clear waiting queue
 
                 return
-                
+
+        # if no new cars loaded at this node, check/move inbound cars:       
         for key in list(self.inbound_edge_id_to_edge_mapping.keys()):
             inbound_edge = self.inbound_edge_id_to_edge_mapping[key]
             # TODO: need random shuffle on inbound edge order
             if inbound_edge.has_car_waiting_to_leave():
-                print("We have a car waitng to leave")
+                print("There is a car waitng to leave edge", inbound_edge.id)
                 car_to_move = inbound_edge.get_car_waiting_to_leave()
-                if car_to_move.get_terminal_point() == self.id:     # path complete
-                    self.cars_exiting_network.append(car_to_move)  # delete car from network / store trip complete
-                    print("A car has reached it's destination")
+                print(car_to_move)
+
+                if car_to_move == [None]:   # handle list error ==> FIX LATER
                     continue
+               
+                elif car_to_move.get_terminal_point() == self.id:     # path complete
+                    self.cars_exiting_network.append(car_to_move)  # delete car from network / store trip complete
+                    print("Car", car_to_move, "has reached its destination")
+                    continue
+
                 # check if outbound possible:
                 next_edge_id = car_to_move.get_next_edge_id()
                 if next_edge_id != None:
                     next_edge = self.outbound_edge_id_to_edge_mapping[next_edge_id]
                     if not next_edge:
                         # exception needed:  car cannot move as intended, see if recalculation possible
-                        raise Exception("that edge does not exist")
+                        raise Exception("That edge does not exist")
                     if next_edge.has_space_for_new_car(0):
                         if not next_edge.pre_loaded_cars[0]:  # if no cars in wait -- TODO:  set up function in car,
                             next_edge.pre_loaded_cars.append(car_to_move)
+                            print(car_to_move, "will advance to edge", next_edge)   # clear waiting queue
+                            next_edge.open_space_at_end = True    # flag that all cars can proceed
                         else:
-                            print("This edge has cars waiting to load")   # clear waiting queue
+                            print(next_edge, "already has cars waiting to load - car will not exit")   # clear waiting queue
                     else:
-                        print("There is no space for this car. Do nothing")
+                        print("There is no space for this car. ")
                     # TODO: add +1 to car_on_network_time ==> use to calculate delays ==> VERSION 2
                 else:
                     print("This car has no path left")
@@ -164,6 +174,8 @@ class Edge():
         self.length = config["edge_length"]
         self.queue = collections.deque([None] * self.length, maxlen=self.length)
         self.pre_loaded_cars = collections.deque([None], maxlen=1)  # FOR NOW:  assume only one car can enter at a time
+        self.open_space_at_end = False  # Toggle in node_tick if car leaves edge
+        self.advance_queue = False      # Toggle in node_tick
 
     def has_space_for_new_car(self, spot_index):
         return False if self.queue[spot_index] else True
@@ -173,14 +185,38 @@ class Edge():
         car = self.queue[-1]
         self.queue[-1] = None
         return car
+    
     def shift_cars_up(self):
         """Shift all cars up by one position
         First check if we have any newcomers"""
         car = self.pre_loaded_cars[0]
         if car:
             self.pre_loaded_cars[0] = None
-            self.queue.appendleft(car)  # This is expensive!
-        self.queue.rotate()
+            self.queue.appendleft(car)      # This is expensive!
+            self.open_space_at_end = False  # ensure flag is back to false
+        elif self.open_space_at_end == True:
+            self.queue.rotate()
+            self.open_space_at_end = False  # ensure flag is back to false
+        else:         # procedurally go through edge and advance any cars where a NULL is present
+            new_edge_queue = collections.deque()
+            null_counter = 0            # for appending Nones at end
+            adjacent_null_counter = 0   # for ensuring cars only advance 1 stage
+            for i in range(self.length):
+                spot = (-1)*(i+1)  # back indexing starts at -1
+                car_value = self.queue[spot]
+                if car_value:
+                    new_edge_queue.appendleft(car_value)
+                elif adjacent_null_counter > 0:
+                    new_edge_queue.appendleft(car_value)
+                    null_counter += 1
+                    adjacent_null_counter = 0
+                else:
+                    adjacent_null_counter = 1
+            new_edge_queue.append(null_counter * [None])
+            self.queue = new_edge_queue
+            self.open_space_at_end = False  # ensure flag is back to false
+            
+
         # self.queue.appendleft(None)  # bounded deque automaticallly discards last element
 
 
