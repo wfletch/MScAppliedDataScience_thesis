@@ -39,6 +39,7 @@ class NetworkManager():
     def __init__(self, network_config):
         self.node_id_to_node_mapping = collections.defaultdict(lambda: None)
         self.edge_id_to_edge_mapping = collections.defaultdict(lambda: None)
+        self.node_id_neighbours = collections.defaultdict(lambda: None)   # FIGURE OUT HOW TO POPULATE
         self.inactive_cars = []     # cars who have completed their trips
 
         for node_entry in network_config["node_list"]:
@@ -79,6 +80,13 @@ class NetworkManager():
             edge.shift_cars_up()
             print(edge.id, edge.queue)
 
+    # def calculate_all_paths(self, start_node, end_node):
+    #     current_route = [start_node]
+    #     current_route_length = 0
+    #     if start_node == end_node:
+    #         print("route complete") 
+    #     for outbound_edge in start_node.outbound_edge_id_to_edge_mapping:
+      
 
 class Node():
     def __init__(self, config) -> None:
