@@ -58,7 +58,8 @@ class NetworkManager():
             to_node = self.node_id_to_node_mapping[new_edge.end_node]
             to_node.inbound_edge_id_to_edge_mapping[new_edge.id] = new_edge    # node: inbound edge
 
-            from_node.node_id_neighbours[from_node.id] += (to_node.id, new_edge.length)  # node: neighbour node  CHECK SYNTAX
+            from_node.node_id_neighbours[from_node.id] += to_node.id  # node: neighbour node  CHECK SYNTAX
+            #  next iteration: append to dict: (to_node.id, new_edge.length)
 
         # print(self.edge_id_to_edge_mapping)
 
@@ -83,12 +84,19 @@ class NetworkManager():
             edge.shift_cars_up()
             print(edge.id, edge.queue)
 
-    # def calculate_all_paths(self, start_node, end_node):
-    #     current_route = [start_node]
-    #     current_route_length = 0
-    #     if start_node == end_node:
-    #         print("route complete") 
-    #     for outbound_edge in start_node.outbound_edge_id_to_edge_mapping:
+    # def calculate_all_paths(self, start_node, end_node, current_path=[]):
+    #     all_paths = []
+    #     if not current_path:  # TODO:  this is clunky, fix later
+    #         current_path = [start_node]
+    #     # current_route_length = 0   # not used in V1
+    #     for neighbour in start_node.node_id_neighbours:  # not considering length yet
+    #         if neighbour not in current_path:
+    #             current_path.append(neighbour)
+    #             if neighbour == end_node:
+    #                 print("route complete") 
+    #                 all_paths.append(current_path)
+                
+
       
 
 class Node():
