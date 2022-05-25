@@ -58,7 +58,7 @@ class NetworkManager():
             to_node = self.node_id_to_node_mapping[new_edge.end_node]
             to_node.inbound_edge_id_to_edge_mapping[new_edge.id] = new_edge    # node: inbound edge
 
-            self.node_id_neighbours[from_node.id].append(to_node.id) # node: neighbour node
+            # self.node_id_neighbours[from_node.id].append(to_node.id) # node: neighbour node  # FIX SYNTAX
             #  next iteration: append to dict: (to_node.id, new_edge.length)
 
         # print(self.edge_id_to_edge_mapping)
@@ -277,6 +277,7 @@ if __name__ == "__main__":
     # print(imported_cars)
     nm = NetworkManager(imported_network)
     tm = TrafficManager(nm, imported_cars)
+    print(nm.node_id_neighbours())
 
     for i in range(8):
         tm.tick()
