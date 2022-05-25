@@ -53,10 +53,13 @@ class NetworkManager():
             self.edge_id_to_edge_mapping[new_edge.id] = new_edge
 
             from_node = self.node_id_to_node_mapping[new_edge.start_node]
-            from_node.outbound_edge_id_to_edge_mapping[new_edge.id] = new_edge
+            from_node.outbound_edge_id_to_edge_mapping[new_edge.id] = new_edge  # node: outbound edge
 
             to_node = self.node_id_to_node_mapping[new_edge.end_node]
-            to_node.inbound_edge_id_to_edge_mapping[new_edge.id] = new_edge
+            to_node.inbound_edge_id_to_edge_mapping[new_edge.id] = new_edge    # node: inbound edge
+
+            from_node.node_id_neighbours[from_node.id] += (to_node.id, new_edge.length)  # node: neighbour node  CHECK SYNTAX
+
         # print(self.edge_id_to_edge_mapping)
 
     def place_new_car(self, car_entry): #None
