@@ -58,7 +58,7 @@ class NetworkManager():
             to_node = self.node_id_to_node_mapping[new_edge.end_node]
             to_node.inbound_edge_id_to_edge_mapping[new_edge.id] = new_edge    # node: inbound edge
 
-            from_node.node_id_neighbours[from_node.id] += to_node.id  # node: neighbour node  CHECK SYNTAX
+            from_node.node_id_neighbours[from_node.id].append(to_node.id) # node: neighbour node
             #  next iteration: append to dict: (to_node.id, new_edge.length)
 
         # print(self.edge_id_to_edge_mapping)
