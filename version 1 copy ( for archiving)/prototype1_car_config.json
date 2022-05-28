@@ -1,0 +1,13 @@
+{
+    "car_list": [
+        {
+            "car_id": 7000,
+            "start_node": 1,
+            "end_node": 4,
+            "path": [
+                5000,
+                5002
+            ]
+        }
+    ]
+}
