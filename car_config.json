@@ -3,8 +3,8 @@
         {
             "car_id": 7000,
             "car_length": 2.5, 
-            "start_node": 1,
-            "end_node": 4,
+            "start_pos": "(5000, 3.2)",
+            "end_pos": "(5002, 20.7)",
             "path": [
                 5000,
                 5002
