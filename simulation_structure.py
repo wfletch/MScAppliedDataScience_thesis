@@ -14,6 +14,7 @@ class TrafficManager():
         self.net = network_config
         self.car_serv = car_server    # this is the access point to the generated cars
         self.fail_to_add = []         # list of cars that could not be added
+        self.inactive_cars = []       # cars who have completed their trips
 
     def load_new_cars_into_edge_queue(self, car_config):
         '''load new cars from JSON config.
@@ -32,6 +33,34 @@ class TrafficManager():
         # for each edge: first place any new cars
         # then move any existing cars forward
         # TODO: shuffle starting edge each time to balance
+
+
+class NetworkManager():
+    def __init__(self, network_config):
+        self.node_id_to_node_mapping = collections.defaultdict(lambda: None)
+        self.edge_id_to_edge_mapping = collections.defaultdict(lambda: None)
+
+        for node_entry in network_config["node_list"]:
+            new_node = Node(node_entry)
+            self.node_id_to_node_mapping[new_node.id] = new_node
+            # self.node_id_to_neighbours_mapping[new_node.id] = new_node  # prepopulate nodes
+        # print(self.node_id_to_node_mapping)
+
+        for edge_entry in network_config["edge_list"]:
+            new_edge = Edge(edge_entry)
+            self.edge_id_to_edge_mapping[new_edge.id] = new_edge
+            # the following steps directly call on Node clas ==> FIX LATER
+            from_node = self.node_id_to_node_mapping[new_edge.start_node]
+            from_node.outbound_edge_id_to_edge_mapping[new_edge.id] = new_edge  # node: outbound edge 
+            to_node = self.node_id_to_node_mapping[new_edge.end_node]
+            to_node.inbound_edge_id_to_edge_mapping[new_edge.id] = new_edge    # node: inbound edge
+
+
+class Node():       # nodes only fascilitate switching edges
+    def __init__(self, config) -> None:
+        self.id = config["node_ID"]
+        self.inbound_edge_id_to_edge_mapping = collections.defaultdict(lambda: None)
+        self.outbound_edge_id_to_edge_mapping = collections.defaultdict(lambda: None) 
 
 
 class Edge():
