@@ -48,7 +48,7 @@ class TrafficManager():
                     cars_added_this_tick.append(new_car)  # add to inbound list
             # then move any existing cars forward ==> TODO:  fix direct calls to edge atts
             max_len_edge = edge.length   # used in calculations
-            prev_car_end_loc = inf          # infinity til known
+            prev_car_end_buffer_loc = max_len_edge          # til known car ahead
             max_dist_per_tick = edge.max_speed * self.tick_length   # speed: m/s; tick: time in s; therefore dist = m
             for existing_car in edge.sorted_cars_on_edge:
                 # complete as must of the path on current edge as possible
@@ -58,7 +58,15 @@ class TrafficManager():
                     # moves to new edge  TODO
                     pass
                 elif end_pos > prev_car_loc:
-                    # cannot move whole legnth, only move to 
+                    # cannot move whole legnth, only move to prev car minus buffer
+                    existing_car.current_location[1] = prev_car_end_buffer_loc
+                    get_end_coord(existing_car)   # update end loc
+                    prev_car_end_buffer_loc = existing_car.current_location[2] - edge.buffer_dist
+                else:   # car can move whole distance forward
+                    existing_car.current_location[1] += max_dist_per_tick
+                    get_end_coord(existing_car)   # update end loc
+                    prev_car_end_buffer_loc = existing_car.current_location[2] - edge.buffer_dist
+                    
 
 
 
@@ -145,7 +153,8 @@ class Edge():
 
     def advance_car(self, max_len, car):
         '''note: max_len is the imported length from the current edge'''
-
+        pass
+    # TODO:  move edge tick logic to edge class ==> requires rewriting class init?
 
 
 
