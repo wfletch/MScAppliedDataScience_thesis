@@ -7,19 +7,22 @@ import random
 # Assumptions:  car will always move max speed (for the edge) if it can
 
 class TrafficManager():
-    def __init__(self, network_config, car_config, tick_length=1):  
+    def __init__(self, network_config, car_config, tick_length=1, duration=1000):  
         self.nm = network_manager
         self.timestamp = 0
         self.tick_length = tick_length  # default: 1 second  TODO: add conversions for other ticks later
+        self.sim_duration = duration    # number of ticks to run simulation for
+        self.time_elapsed = 0           # +=1 per tick
         self.net = network_config
         self.car_serv = car_server    # this is the access point to the generated cars
         self.fail_to_add = []         # list of cars that could not be added
         self.inactive_cars = []       # cars who have completed their trips
 
-    def load_new_cars_into_edge_queue(self):
+    def load_new_cars_into_edge_queue(self, car_config):
         '''load new cars from JSON config.
         add new cars to their respective edge loading queues'''
-        car_config = # HOW TO ACCESS ZVEZDELIN"S CAR SERVER? ==> and how to prevent multiple reads of the same file at different time stamps?
+        # TODO:  fix:  currently uploading straight from json for testing
+        # HOW TO ACCESS ZVEZDELIN"S CAR SERVER? ==> and how to prevent multiple reads of the same file at different time stamps?
         for car_entry in car_config["car_list"]:
             new_car = Car(car_entry)
             start_edge = self.nm.edge_id_to_edge_mapping[car_entry.start_pos[0]]
@@ -165,3 +168,21 @@ class Car():
             end_loc = 0
         else:
             self.current_location[2] = end_loc
+
+
+
+
+if __name__ == "__main__":
+    fh_network = open('network_config.json')
+    imported_network = json.load(fh_network)
+    fh_network.close()
+
+    fh_car = open('car_config.json')
+    imported_cars = json.load(fh_car)
+    fh_car.close()
+
+    nm = NetworkManager(imported_network)
+    tm = TrafficManager(nm, imported_cars, 1, 10)  
+
+    while tm.time_elapsed < tm.sim_duration:
+        tm.tick()
