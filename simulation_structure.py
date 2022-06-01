@@ -82,12 +82,11 @@ class TrafficManager():
         random.shuffle(edge_list)
 
         # KNOWN BUG: cars hypothetically enter edge based on pre-tick/mid-tick state.  This means cars can pile up at 0
-        # suggested fix: process TOCK at the start of each tick edge, before new car placement
+        # suggested fix: process TOCK at the start of each tick edge, before new car placement ==> change to tock(self,edge)
         for edge in edge_list:
+            pass 
 
         
-
-
 
 
 class NetworkManager():
@@ -129,7 +128,7 @@ class Edge():
         
         self.buffer_dist = 0   # mandatory minimum spacing between vehicles  TODO:  call on global variable
         self.max_capacity = network_config["max_capacity"]
-        self.cars_on_edge = {}   # dict of cars
+        self.cars_on_edge = {}   # dict of cars  TODO: map cars to current edge_ID
         self.car_on_edge_start_pos_sorted = sorted(cars_on_edge.values[1]())  # ordered list of car starts, max to min?
         self.sorted_cars_on_edge = self.sort_cars_on_edge_dict()   # function to recaulculate whenever called
         self.pos_closest_car_end_to_zero_plus_buffer = inf   # overwritten after first tick, updates per tick
