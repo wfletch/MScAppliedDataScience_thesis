@@ -1,3 +1,4 @@
+from cmath import inf
 import collections
 import copy
 import json
@@ -45,8 +46,21 @@ class TrafficManager():
             for new_car in edge_list.waiting_cars:
                 if edge_list.place_car(new_car) == True:
                     cars_added_this_tick.append(new_car)  # add to inbound list
-            # then move any existing cars forward
-            for existing_car in 
+            # then move any existing cars forward ==> TODO:  fix direct calls to edge atts
+            max_len_edge = edge.length   # used in calculations
+            prev_car_end_loc = inf          # infinity til known
+            max_dist_per_tick = edge.max_speed * self.tick_length   # speed: m/s; tick: time in s; therefore dist = m
+            for existing_car in edge.sorted_cars_on_edge:
+                # complete as must of the path on current edge as possible
+                start_pos = existing_car.current_location[1]
+                end_pos = start_pos + max_dist_per_tick    # assumes car goes max speed
+                if end_pos > max_len_edge:
+                    # moves to new edge  TODO
+                    pass
+                elif end_pos > prev_car_loc:
+                    # cannot move whole legnth, only move to 
+
+
 
 
 
@@ -55,6 +69,7 @@ class NetworkManager():
     def __init__(self, network_config):
         self.node_id_to_node_mapping = collections.defaultdict(lambda: None)
         self.edge_id_to_edge_mapping = collections.defaultdict(lambda: None)
+        self.buffer_dist_global = 0   # mandatory minimum spacing between vehicles
 
         for node_entry in network_config["node_list"]:
             new_node = Node(node_entry)
@@ -87,6 +102,7 @@ class Edge():
         self.length = network_config["edge_length"]    # currently in meters
         self.max_speed = network_config["max_speed"]   # currently in m/s
         
+        self.buffer_dist = 0   # mandatory minimum spacing between vehicles  TODO:  call on global variable
         self.max_capacity = network_config["max_capacity"]
         self.cars_on_edge = {}   # dict of cars
         self.car_on_edge_start_pos_sorted = sorted(cars_on_edge.values[1]())  # ordered list of car starts, max to min?
@@ -107,24 +123,29 @@ class Edge():
 
     def check_if_spot_available(self, car_to_add):
         '''car taken from loading queue, therefore already assumed to be on the correct edge'''
-        start_pos_meter = car_to_add.start_pos[1]
+        start_position_meters = car_to_add.start_pos[1] + self.buffer_dist  # buffer space ahead
+        end_position_meters = car_to_add.start_pos[2] - self.buffer_dist  # buffer space behind
         if not car_to_add.start_pos[2]:
             get_end_coord(car_to_add)
-        end_pos_meter = car_to_add.start_pos[2]
-        for car_front_pos in self.car_on_edge_start_pos_sorted:
-            if car_front_pos < end_pos_meter:
-                break  # car end has no conflict with car fronts behind its entry point
+        for existing_car in self.sorted_cars_on_edge:  # calls from max existing to min
+            if existing_car[1] < end_position_meters:
+                return True     # car end has no conflict with car fronts behind its entry point
             # car_end_pos = sorted_cars_on_edge[2]    TO+DO:  fix whole if statement to index instead of value
-            elif car_end_pos < start_pos_meter:
-                return False  # results in overlap
-                # need function to get end pos from sorted start dict ==> currently using the sorted dict
-        return True
+            elif existing_car[2] < start_position_meters:
+                return False     # results in car overlap
+            # if existing carr entirely ahead of car to place, try check for next furthest car
+
+        
 
     def place_car(self, car_to_add):
         if check_if_spot_available(self, car_to_add) == True:
             return True
         else:
             return False
+
+    def advance_car(self, max_len, car):
+        '''note: max_len is the imported length from the current edge'''
+
 
 
 
