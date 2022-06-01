@@ -56,6 +56,12 @@ class TrafficManager():
                 end_pos = start_pos + max_dist_per_tick    # assumes car goes max speed
                 if end_pos > max_len_edge:
                     # moves to new edge  TODO
+                    # calulate percent of tick to end of current edge
+                    # find next edge
+                    # try: place at 0 of next edge
+                        # if not possible, set front position to end of current edge
+                    # if possible: remove from current edge dict and put in new TOCK waiting queue
+                    # process max advancements on new edge in a separate TOCK(self) phase
                     pass
                 elif end_pos > prev_car_loc:
                     # cannot move whole legnth, only move to prev car minus buffer
@@ -66,9 +72,20 @@ class TrafficManager():
                     existing_car.current_location[1] += max_dist_per_tick
                     get_end_coord(existing_car)   # update end loc
                     prev_car_end_buffer_loc = existing_car.current_location[2] - edge.buffer_dist
+            edge.pos_closest_car_end_to_zero_plus_buffer = prev_car_end_buffer_loc  # needed for TOCK processing
                     
 
+    def tock(self):
+        '''takes care of remaining route advancement for cars that transferred edges'''
+        # processes TOCK waiting queue in order of highest %tick time left
+        edge_list = list(self.nm.edge_id_to_edge_mapping.keys()) 
+        random.shuffle(edge_list)
 
+        # KNOWN BUG: cars hypothetically enter edge based on pre-tick/mid-tick state.  This means cars can pile up at 0
+        # suggested fix: process TOCK at the start of each tick edge, before new car placement
+        for edge in edge_list:
+
+        
 
 
 
@@ -115,8 +132,10 @@ class Edge():
         self.cars_on_edge = {}   # dict of cars
         self.car_on_edge_start_pos_sorted = sorted(cars_on_edge.values[1]())  # ordered list of car starts, max to min?
         self.sorted_cars_on_edge = self.sort_cars_on_edge_dict()   # function to recaulculate whenever called
+        self.pos_closest_car_end_to_zero_plus_buffer = inf   # overwritten after first tick, updates per tick
 
         self.waiting_cars = []   # list tuple cars that are waiting to enter ==> ordered by wait time
+        self.tock_waiting = {}   # dict car IDs and percent tick left for cars that just switched onto this route
     
     
     def sort_cars_on_edge_dict(self):
@@ -215,4 +234,5 @@ if __name__ == "__main__":
     tm = TrafficManager(nm, imported_cars, 1, 10)  
 
     while tm.time_elapsed < tm.sim_duration:
-        tm.tick()
+        tm.tick()  # place and advance on current edge
+        tm.tock()  # advance as much as possible on new edge
