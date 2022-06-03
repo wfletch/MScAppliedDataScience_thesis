@@ -55,14 +55,22 @@ class TrafficManager():
                 start_pos = existing_car.current_location[1]
                 end_pos = start_pos + max_dist_per_tick    # assumes car goes max speed
                 if end_pos > max_len_edge:
-                    # moves to new edge  TODO
-                    # calulate percent of tick to end of current edge
-                    # find next edge
-                    # try: place at 0 of next edge
-                        # if not possible, set front position to end of current edge
-                    # if possible: remove from current edge dict and put in new TOCK waiting queue
-                    # process max advancements on new edge in a separate TOCK(self) phase
-                    pass
+                    if end_pos - max_len_edge < existing_car.car_length:
+                        # car does not fit on new edge, wait at end of cutrrent edge
+                        existing_car.current_location[1] = max_len_edge
+                        get_end_coord(existing_car)   # update end loc
+                        prev_car_end_buffer_loc = existing_car.current_location[2] - edge.buffer_dist
+                    else:
+                        # moves to new edge:  TODO
+                        # calulate percent of tick to end of current edge
+                        dist_traveled_on_current_edge = max_len_edge - start_pos
+                        percent_of_tick_to_edge_end = max_dist_per_tick/dist_traveled_on_current_edge
+                        # find next edge
+                        # try: place at 0 of next edge
+                            # if not possible, set front position to end of current edge
+                        # if possible: remove from current edge dict and put in new TOCK waiting queue
+                        # process max advancements on new edge in a separate TOCK(self) phase
+                        pass
                 elif end_pos > prev_car_loc:
                     # cannot move whole legnth, only move to prev car minus buffer
                     existing_car.current_location[1] = prev_car_end_buffer_loc
