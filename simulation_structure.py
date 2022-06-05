@@ -9,17 +9,19 @@ import random
 
 class TrafficManager():
     def __init__(self, network_config, car_config, tick_length=1, duration=1000):  
-        self.nm = network_manager
-        self.timestamp = 0
+        # Might want to add descritpions of what an init process looks like.
+        # This applies to most of your complicated functions.
+        self.nm = NetworkManager()
+        self.timestamp = 0              
         self.tick_length = tick_length  # default: 1 second  TODO: add conversions for other ticks later
         self.sim_duration = duration    # number of ticks to run simulation for
         self.time_elapsed = 0           # +=1 per tick
         self.net = network_config
-        self.car_serv = car_server    # this is the access point to the generated cars
+        self.car_serv = CarServer()    # this is the access point to the generated cars
         self.fail_to_add = []         # list of cars that could not be added
-        self.inactive_cars = []       # cars who have completed their trips
+        self.inactive_cars = []       # cars who have completed their trips (Might want to rename this variable to a better name. Inactive is a bit too general)
 
-    def load_new_cars_into_edge_queue(self, car_config):
+    def load_new_cars_into_edge_queue(self, car_config): # Technically, at this stage, you have already loaded and processed the car JSON object into a python dict.
         '''load new cars from JSON config.
         add new cars to their respective edge loading queues'''
         # TODO:  fix:  currently uploading straight from json for testing
@@ -36,6 +38,8 @@ class TrafficManager():
 
     def tick(self):
         # import new cars
+        # Would highly recommened a detailed description of what the Tick process does (or intends to do)
+        # Even if you don't have that code written yet.
         self.load_new_cars_into_edge_queue()   # how to make sure same cars aren't imported again and again?  probably check some kind of dict
         edge_list = list(self.nm.edge_id_to_edge_mapping.keys()) 
         
@@ -57,7 +61,11 @@ class TrafficManager():
                 if end_pos > max_len_edge:
                     if end_pos - max_len_edge < existing_car.car_length:
                         # car does not fit on new edge, wait at end of cutrrent edge
-                        existing_car.current_location[1] = max_len_edge
+                        existing_car.current_location[1] = max_len_edge # The car representation of the object does not need to be the same as the JSON representation
+                        # It might make sense to seperate the current_location[0,1] elements into seperate fields
+                        # Also, make sure this current_location (if kept as ONE field) is an array and not a tuple (tuple's are immutabel)
+
+                        # Is this method below part of a util class or a function of the edge/car?
                         get_end_coord(existing_car)   # update end loc
                         prev_car_end_buffer_loc = existing_car.current_location[2] - edge.buffer_dist
                     else:
@@ -81,10 +89,15 @@ class TrafficManager():
                     get_end_coord(existing_car)   # update end loc
                     prev_car_end_buffer_loc = existing_car.current_location[2] - edge.buffer_dist
             edge.pos_closest_car_end_to_zero_plus_buffer = prev_car_end_buffer_loc  # needed for TOCK processing
+            # Overall, it seems you wrote a lot of code without testing smaller parts of it. 
+            # Generally, the style is good, I can't really check the logic without some sort of diagram explaining tick/tock processes
+            # 
                     
 
     def tock(self):
         '''takes care of remaining route advancement for cars that transferred edges'''
+        # I believe an action queue could vastly simplify the execution of state transitions.
+        # Having a tick state implies a tock state. Are there situations where ticks would occur bit no tocks?
         # processes TOCK waiting queue in order of highest %tick time left
         edge_list = list(self.nm.edge_id_to_edge_mapping.keys()) 
         random.shuffle(edge_list)
@@ -148,6 +161,8 @@ class Edge():
     def sort_cars_on_edge_dict(self):
         '''create sorted dict to help with car addition checks and car movement checks'''
         sorted_dict = {}
+        # Are you ordering a dict? https://docs.python.org/3/library/collections.html#collections.OrderedDict Might be worth looking into.
+        # I need diagrms to figure this out :p
         for pos in car_on_edge_start_pos_sorted:
             for dict_pos in cars_on_edge.values[1]():   # this assumes positions are unique ==> may cause problems later
                 if cars_on_edge[dict_pos] == pos:
@@ -197,14 +212,14 @@ class Car():
     def __init__(self, config):
         self.id = config["car_id"]
         self.car_length = config["car_length"]
-        self.start_pos = tuple(config["start_pos"])
-        self.end_pos = tuple(config["end_pos"])
+        self.start_pos = tuple(config["start_pos"]) # THIS IS UNMODIFIABLE!!!!!
+        self.end_pos = tuple(config["end_pos"]) # THIS IS UNMODIFIABLE!!!!!
         
         self.upcoming_path = config["path"]   # replace with path calculation later
         self.edge_stack = copy.deepcopy(self.upcoming_path)
         self.edge_stack.reverse()   # reverse order for pop / next_edge function
         self.path_driven = []
-        self.current_location = tuple(0, 0, 0)  # will store edge, start pos, end post
+        self.current_location = tuple(0, 0, 0)  # will store edge, start pos, end post <- UNMODIABLE. But you can reassign the variable
 
     def get_next_edge_id(self):  # derive from path computation later
         if self.edge_stack == []:
